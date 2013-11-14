@@ -13,14 +13,15 @@ module Wonga
         when :stopped
           instance.start
           @logger.info("Instance #{message['instance_id']} start requested")
+        when :terminated
+          @logger.error
+          return
         when :running
           @publisher.publish message
-          @logger.info("Instance #{message['instance_id']} started")          
-        when :pending
-          raise "Instance #{message['instance_id']} still pending"
-        else
-          @logger.error("Unexpected state encountered: #{instance.status} for instance #{message['instance_id']}")
-        end
+          @logger.info("Instance #{message['instance_id']} started")
+          return
+        end        
+        raise "Instance #{message['instance_id']} still pending"
       end
     end
   end

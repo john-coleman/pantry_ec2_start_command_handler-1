@@ -23,17 +23,18 @@ describe Wonga::Daemon::PantryEc2StartCommandHandler do
     context "machine stopped" do
       it "calls instance.start" do
         instance.stub(:status).and_return(:stopped)        
-        instance.should_receive(:start).and_return(nil) # even on success returns nil
-        subject.handle_message({"instance_id"=>"i-6c3db923"})
+        instance.should_receive(:start)
+        expect{
+          subject.handle_message({"instance_id"=>"i-3245243"})
+        }.to raise_error
       end
     end
 
-    context "machine pending" do 
-      it "raises a benign error" do
-        instance.stub(:status).and_return(:pending)        
-        expect {
-          subject.handle_message("instance_id"=>"i-6c3db923") 
-        }.to raise_error
+    context "machine terminated" do 
+      it "returns" do
+        expect{
+          subject.handle_message({"instance_id"=>"i-3245243"})
+        }
       end
     end
 
@@ -42,6 +43,14 @@ describe Wonga::Daemon::PantryEc2StartCommandHandler do
         instance.stub(:status).and_return(:running)
         publisher.should_receive(:publish)        
         subject.handle_message({"instance_id"=>"i-6c3db923"})
+      end
+    end
+
+    context "otherwise" do 
+      it "should raise a benign error" do 
+        expect{
+          subject.handle_message({"instance_id"=>"i-3245243"})
+        }.to raise_error
       end
     end
   end
