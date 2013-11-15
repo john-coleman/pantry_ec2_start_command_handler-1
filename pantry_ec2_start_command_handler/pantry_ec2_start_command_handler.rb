@@ -6,6 +6,7 @@ module Wonga
         @logger = logger
       end
 
+
       def handle_message(message)
         ec2 = AWS::EC2.new
         instance = ec2.instances[message['instance_id']]
