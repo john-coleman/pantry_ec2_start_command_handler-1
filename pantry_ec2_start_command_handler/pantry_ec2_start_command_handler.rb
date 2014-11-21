@@ -1,4 +1,3 @@
-require 'pry'
 module Wonga
   module Daemon
     class PantryEc2StartCommandHandler
