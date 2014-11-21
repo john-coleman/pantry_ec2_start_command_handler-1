@@ -1,11 +1,12 @@
+require 'pry'
 module Wonga
   module Daemon
     class PantryEc2StartCommandHandler
-      def initialize(publisher, logger)
+      def initialize(publisher, error_publisher, logger)
         @publisher = publisher
+        @error_publisher = error_publisher
         @logger = logger
       end
-
 
       def handle_message(message)
         ec2 = AWS::EC2.new
@@ -15,14 +16,19 @@ module Wonga
           instance.start
           @logger.info("Instance #{message['instance_id']} start requested")
         when :terminated
-          @logger.error
+          send_error_message(message)
           return
         when :running
           @publisher.publish message
           @logger.info("Instance #{message['instance_id']} started")
           return
-        end        
-        raise "Instance #{message['instance_id']} still pending"
+        end
+        fail "Instance #{message['instance_id']} still pending"
+      end
+
+      def send_error_message(message)
+        @logger.info 'Send request to cleanup an instance'
+        @error_publisher.publish(message)
       end
     end
   end
