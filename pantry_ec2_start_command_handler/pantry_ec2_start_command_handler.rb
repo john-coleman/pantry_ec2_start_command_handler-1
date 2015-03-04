@@ -10,6 +10,11 @@ module Wonga
       def handle_message(message)
         ec2 = AWS::EC2.new
         instance = ec2.instances[message['instance_id']]
+        unless instance && instance.exists?
+          send_error_message(message)
+          return
+        end
+
         case instance.status
         when :stopped
           instance.start
@@ -22,6 +27,7 @@ module Wonga
           @logger.info("Instance #{message['instance_id']} started")
           return
         end
+
         fail "Instance #{message['instance_id']} still pending"
       end
 
