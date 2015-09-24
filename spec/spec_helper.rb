@@ -8,36 +8,29 @@ unless ENV['SKIP_COV']
   SimpleCov.start
 end
 
-require 'aws'
 require 'spec_support/shared_daemons'
-
-AWS.config access_key_id: 'test', secret_access_key: 'test'
-AWS.stub!
+require 'aws-sdk'
 
 RSpec.configure do |config|
-  # rspec-expectations config goes here. You can use an alternate
-  # assertion/expectation library such as wrong or the stdlib/minitest
-  # assertions if you prefer.
   config.expect_with :rspec do |expectations|
-    # Enable only the newer, non-monkey-patching expect syntax.
-    # For more details, see:
-    #   - http://myronmars.to/n/dev-blog/2012/06/rspecs-new-expectation-syntax
-    expectations.syntax = :expect
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+    expectations.syntax = :expect
   end
 
-  # rspec-mocks config goes here. You can use an alternate test double
-  # library (such as bogus or mocha) by changing the `mock_with` option here.
   config.mock_with :rspec do |mocks|
-    # Enable only the newer, non-monkey-patching expect syntax.
-    # For more details, see:
-    #   - http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/
-    mocks.syntax = :expect
-
-    # Prevents you from mocking or stubbing a method that does not exist on
-    # a real object. This is generally recommended.
     mocks.verify_partial_doubles = true
+    mocks.syntax = :expect
   end
 
   config.disable_monkey_patching!
+  config.default_formatter = 'doc' if config.files_to_run.one?
+
+  config.filter_run focus: true
+  config.run_all_when_everything_filtered = true
+  config.order = :random
+  config.before(:each) do
+    Aws.config[:credentials] = Aws::Credentials.new 'test', 'test'
+    Aws.config[:region] = 'eu-west-1'
+    Aws.config[:stub_responses] = true
+  end
 end
