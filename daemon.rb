@@ -8,4 +8,4 @@ Wonga::Daemon.load_config(File.expand_path(config_name))
 Wonga::Daemon.run(Wonga::Daemon::PantryEc2StartCommandHandler.new(Wonga::Daemon.publisher,
                                                                   Wonga::Daemon.error_publisher,
                                                                   Wonga::Daemon.logger,
-                                                                  Wonga::Daemon::AWSResource.new))
+                                                                  Wonga::Daemon.aws_resource))
